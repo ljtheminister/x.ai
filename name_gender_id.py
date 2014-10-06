@@ -18,12 +18,10 @@ import random
 names_male = [name for name in names.words('male.txt')]
 names_female = [name for name in names.words('female.txt')]
 
-
-
 names = ([(name, 'male') for name in names.words('male.txt')] +
          [(name, 'female') for name in names.words('female.txt')])
 
-train_set, test+set = feat
+train_set, test_set = feat
 
 
 from nltk import NaiveBayesClassifier, classify
@@ -39,7 +37,9 @@ def _nameFeatures(self,name):
     }
 
 
-
+'''
+What is performance of NER algorithm?
+'''
 
 
 
