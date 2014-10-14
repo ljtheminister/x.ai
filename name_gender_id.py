@@ -1,5 +1,4 @@
 '''
-import sys
 import os
 from collections import defaultdict
 import string
@@ -15,12 +14,13 @@ from nltk import sent_tokenize, word_tokenize, pos_tag, ne_chunk
 from nltk import NaiveBayesClassifier, classify
 from nltk.corpus import names
 '''
-
+import sys
 import random
 from sklearn.metrics import roc_curve, auc
+import nltk
 from nltk.tag.stanford import NERTagger
 
-
+# Given a sentence, produce a list of peoples' full names
 class Name_Identifier():
 
     def __init__(self, tagger='Stanford'):
@@ -66,13 +66,7 @@ class Name_Identifier():
         return names
 
 
-names = Name_Identifier('NLTK').get_names(sentence)
-names = Name_Identifier('Stanford').get_names(sentence)
-
-GP = Gender_Predictor()
-GP.predict_gender(name)
-
-
+# Given name, classify the name's gender as male or female
 class Gender_Predictor():
     
     def __init__(self):
@@ -93,12 +87,10 @@ class Gender_Predictor():
 
         self.male_set = male_set
         self.female_set = female_set
-
-
         random.shuffle(names)
 
-        feature_sets = [(name_features(name), gender) for (name, gender) in names]
-        train_set, test_set = feature_sets[1000:], featuresets[:1000]
+        self.feature_sets = [(name_features(name), gender) for (name, gender) in names]
+        self.train_set, self.test_set = feature_sets[1000:], featuresets[:1000]
 
 
     def get_name_features(self):
@@ -120,6 +112,9 @@ class Gender_Predictor():
 
 
 if __name__ == '__main__':
+    #sentence = ' '.join(sys.argv[1:])
     sentence = 'Some economists have responded positively to Bitcoin, including Francois R. Velde'
-    names = Name_Identifier(sentence)
-    genders = Gender_Predictor(names)
+    names = Name_Identifier('NLTK').get_names(sentence)
+    names = Name_Identifier('Stanford').get_names(sentence)
+    GP = Gender_Predictor()
+    GP.predict_gender(name)
