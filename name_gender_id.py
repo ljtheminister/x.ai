@@ -15,85 +15,46 @@ from nltk import NaiveBayesClassifier, classify
 from nltk.corpus import names
 import random
 from sklearn.metrics import roc_curve, auc
-
-
 from nltk.tag.stanford import NERTagger
-
-names_male = [name for name in names.words('male.txt')]
-names_female = [name for name in names.words('female.txt')]
-
-names = ([(name, 'male') for name in names.words('male.txt')] +
-         [(name, 'female') for name in names.words('female.txt')])
-
-
-male_set = set(names_male)
-female_set = set(names_female)
-male_set -= female_set
-female_set -= male_set
-
-random.shuffle(names)
-train_set, test_set = names[1000:], names[:1000]
-
-def get_names(sentence):
-    names = []
-    '''
-    tokens = nltk.tokenize.word_tokenize(sentence)
-    pos_tags = nltk.pos_tag(tokens)
-    sent = nltk.ne_chunk(pos_tags)
-    '''
-    st = NERTagger('/usr/share/stanford-ner/classifiers/all.3class.distsim.crf.ser.gz',
-               '/usr/share/stanford-ner/stanford-ner.jar') 
-    ner_tags = st.tag(sentence)
-
-
-def get_full_names(ner_tags):
-    names = []
-    name = None
-    for i in xrange(len(ner_tags)):
-        ne, ne_tag = ner_tags[i] 
-
-        if ne_tag == 'PERSON':
-            if (name):
-                name += ' ' + ne
-            else:
-                name = ne
-
-        else:
-            if (name):
-                names.append(name)
-                name = None
-    return names    
-
-
-
-def name_features(name):
-    name = name.lower()
-    return {
-        'last_letter' : name[-1],
-        'last_two' : name[-2:],
-        'last_is_vowel' : (name[-1] in 'aeiouy')
-    }
-
-
-
-
-
-
 
 
 class Name_Identifier():
 
     def __init__(self, sentence):
         self.sentence = sentence
+        self.names = None
 
     def get_names(self):
-        ''' 
-        tokens = nltk.tokenize.word_tokenize(sentence)
-        pos_tags = nltk.pos_tag(tokens)
-        sent = nltk.ne_chunk(pos_tags)
-        '''
+            '''
+            tokens = nltk.tokenize.word_tokenize(sentence)
+            pos_tags = nltk.pos_tag(tokens)
+            sent = nltk.ne_chunk(pos_tags)
+            '''
+            # Use Stanford NER Tagger instead of NLTK default
+            st = NERTagger('/usr/share/stanford-ner/classifiers/english.all.3class.distsim.crf.ser.gz',
+                       '/usr/share/stanford-ner/stanford-ner.jar') 
+            ner_tags = st.tag(self.sentence.split())
+            self.names = self.get_names_from_tags(ner_tags)
+
+    def get_names_from_tags(self, ner_tags):
+        names = []
+        name = None
+        for i in xrange(len(ner_tags)):
+            ne, ne_tag = ner_tags[i] 
+            if ne_tag == 'PERSON':
+                if (name):
+                    name += ' ' + ne
+                else:
+                    name = ne
+            else:
+                if (name):
+                    names.append(name)
+                    name = None
+        return names
 
 
+n = Name_Identifier(sentence)
+n.get_names()
 
 class Gender_Predictor():
     
@@ -112,12 +73,29 @@ class Gender_Predictor():
 
     # Naive Bayes Classifier
 
-from nltk.tag.stanford import NERTagger
 
-st = NERTagger('/usr/share/stanford-ner/classifiers/english.all.3class.distsim.crf.ser.gz',
-               '/usr/share/stanford-ner/stanford-ner.jar') 
+names_male = [name for name in names.words('male.txt')]
+names_female = [name for name in names.words('female.txt')]
 
-st.tag(sentence)
+names = ([(name, 'male') for name in names.words('male.txt')] +
+         [(name, 'female') for name in names.words('female.txt')])
+
+
+male_set = set(names_male)
+female_set = set(names_female)
+male_set -= female_set
+female_set -= male_set
+
+random.shuffle(names)
+
+feature_sets = [(gender_features(name), gender) for (name, gender) in names]
+train_set, test_set = feature_sets[1000:], featuresets[:1000]
+
+classifier_NB = nltk.NaiveBayesClassifier.train(train_set)
+
+
+
+
 
 
 if __name__ == '__main__':
