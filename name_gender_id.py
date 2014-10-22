@@ -121,9 +121,7 @@ class Gender_Predictor():
 
     def test_classifier(self):
         accuracy = classify.accuracy(self.classifier, self.test_set)
-
-
-
+        # ROC curve - building one from sklearn - plotting ROC, computing AUC
 
     def get_most_informative_features(self, n_features=5):
         return self.classifier.most_informative_features(n_features)
